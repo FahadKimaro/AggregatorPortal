@@ -34,12 +34,12 @@ const CoverDetailsStep: React.FC<CoverDetailsStepProps> = ({ data, onSave, onPre
   ];
 
   const availableAddOns = [
-    { id: 'roadside', name: 'Roadside Assistance', premium: 150, description: '24/7 roadside support and towing' },
-    { id: 'windscreen', name: 'Windscreen Protection', premium: 200, description: 'Full windscreen replacement coverage' },
-    { id: 'keycare', name: 'Key Care', premium: 100, description: 'Lost or stolen key replacement' },
-    { id: 'legal', name: 'Legal Protection', premium: 120, description: 'Legal expenses coverage' },
-    { id: 'breakdown', name: 'Breakdown Cover', premium: 180, description: 'Emergency breakdown assistance' },
-    { id: 'personal_accident', name: 'Personal Accident', premium: 250, description: 'Personal injury coverage for driver and passengers' }
+    { id: 'roadside', name: 'Roadside Assistance', premium: 150000, description: '24/7 roadside support and towing' },
+    { id: 'windscreen', name: 'Windscreen Protection', premium: 200000, description: 'Full windscreen replacement coverage' },
+    { id: 'keycare', name: 'Key Care', premium: 100000, description: 'Lost or stolen key replacement' },
+    { id: 'legal', name: 'Legal Protection', premium: 120000, description: 'Legal expenses coverage' },
+    { id: 'breakdown', name: 'Breakdown Cover', premium: 180000, description: 'Emergency breakdown assistance' },
+    { id: 'personal_accident', name: 'Personal Accident', premium: 250000, description: 'Personal injury coverage for driver and passengers' }
   ];
 
   // Auto-set premium rate when insurance class changes
