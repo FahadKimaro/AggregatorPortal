@@ -20,7 +20,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     // Simulate login delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    if (username === 'Demo' && password === '123') {
+    if (username === 'demo' && password === '123') {
       onLogin();
     } else {
       setError('Invalid username or password');
@@ -115,7 +115,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="bg-gray-50 rounded-lg p-3">
               <p className="text-xs text-gray-600 text-center">
                 Demo Credentials:<br />
-                Username: Demo<br />
+                Username: demo<br />
                 Password: 123
               </p>
             </div>
