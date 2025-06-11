@@ -35,7 +35,7 @@ const CoverDetailsStep: React.FC<CoverDetailsStepProps> = ({ data, onSave, onPre
 
   const availableAddOns = [
     { id: 'roadside', name: 'Roadside Assistance', premium: 150000, description: '24/7 roadside support and towing' },
-    { id: 'windscreen', name: 'Windscreen Protection', premium: 200,000, description: 'Full windscreen replacement coverage' },
+    { id: 'windscreen', name: 'Windscreen Protection', premium: 200000, description: 'Full windscreen replacement coverage' },
     { id: 'keycare', name: 'Key Care', premium: 100000, description: 'Lost or stolen key replacement' },
     { id: 'legal', name: 'Legal Protection', premium: 120000, description: 'Legal expenses coverage' },
     { id: 'breakdown', name: 'Breakdown Cover', premium: 180000, description: 'Emergency breakdown assistance' },
