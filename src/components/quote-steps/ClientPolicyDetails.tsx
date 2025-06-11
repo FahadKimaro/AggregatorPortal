@@ -27,10 +27,9 @@ const ClientPolicyDetails: React.FC<ClientPolicyDetailsProps> = ({ data, onNext,
   ];
 
   const currencies = [
-    { code: "USD", name: "US Dollar", symbol: "$" },
-    { code: "EUR", name: "Euro", symbol: "€" },
-    { code: "GBP", name: "British Pound", symbol: "£" },
     { code: "TZS", name: "Tanzanian Shilling", symbol: "TZS" },
+    { code: "USD", name: "US Dollar", 
+symbol: "$" },
     { code: "KES", name: "Kenyan Shilling", symbol: "KSh" },
     { code: "UGX", name: "Ugandan Shilling", symbol: "UGX" }
   ];
