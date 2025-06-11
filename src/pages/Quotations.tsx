@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Plus, Search, Filter, Eye, Send, Download } from 'lucide-react';
+import QuotationForm from '../components/QuotationForm';
 
 const Quotations: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
-  const quotations = [
+  const [quotations, setQuotations] = useState([
     {
       id: 'QT-2024-001',
       client: 'John Doe',
@@ -36,7 +38,22 @@ const Quotations: React.FC = () => {
       validUntil: '2024-02-25',
       created: '2024-01-13'
     },
-  ];
+  ]);
+
+  const handleQuoteComplete = (quoteData: any) => {
+    const newQuote = {
+      id: `QT-2024-${String(quotations.length + 1).padStart(3, '0')}`,
+      client: quoteData.clientDetails?.clientName || 'Unknown Client',
+      company: quoteData.clientDetails?.insuredName || 'Unknown Company',
+      product: 'Motor Insurance',
+      premium: `${quoteData.clientDetails?.currency || 'USD'} ${quoteData.coverDetails?.totalPremium?.toFixed(2) || '0.00'}`,
+      status: 'draft',
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      created: new Date().toISOString().split('T')[0]
+    };
+    
+    setQuotations(prev => [newQuote, ...prev]);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -65,7 +82,10 @@ const Quotations: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Quotations</h1>
           <p className="text-gray-600">Create and manage insurance quotations</p>
         </div>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+        <button 
+          onClick={() => setIsFormOpen(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+        >
           <Plus className="h-5 w-5" />
           <span>Create Quotation</span>
         </button>
@@ -74,19 +94,23 @@ const Quotations: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-blue-600">156</div>
+          <div className="text-2xl font-bold text-blue-600">{quotations.length}</div>
           <div className="text-gray-600">Total Quotes</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-yellow-600">42</div>
+          <div className="text-2xl font-bold text-yellow-600">
+            {quotations.filter(q => q.status === 'pending').length}
+          </div>
           <div className="text-gray-600">Pending</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-green-600">89</div>
+          <div className="text-2xl font-bold text-green-600">
+            {quotations.filter(q => q.status === 'accepted').length}
+          </div>
           <div className="text-gray-600">Accepted</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-purple-600">TZS 8,452,000</div>
+          <div className="text-2xl font-bold text-purple-600">TZS 11,450,000</div>
           <div className="text-gray-600">Total Value</div>
         </div>
       </div>
@@ -186,6 +210,13 @@ const Quotations: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Quotation Form Modal */}
+      <QuotationForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onComplete={handleQuoteComplete}
+      />
     </div>
   );
 };
