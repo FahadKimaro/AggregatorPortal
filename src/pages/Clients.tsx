@@ -40,8 +40,7 @@ const Clients: React.FC = () => {
 
   ]);
 
-  const { data, error } = await supabase.from('client').insert([newClient]);
-
+  const handleAddClient = (clientData: any) => { 
     const newClient: Client = {
       id: `CLT-${String(clients.length + 1).padStart(3, '0')}`,
       clientType: clientData.type,
