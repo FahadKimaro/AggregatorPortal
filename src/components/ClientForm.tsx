@@ -1,13 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Building2, MapPin } from 'lucide-react';
+
+interface Client {
+  id: string;
+  clientType: 'individual' | 'corporate';
+  title: string;
+  fullName: string;
+  dateOfBirth: string;
+  idType: string;
+  idNumber: string;
+  gender: string;
+  nationality: string;
+  countryOfRegistration: string;
+  businessType: string;
+  registrationNumber: string;
+  tinNumber: string;
+  vrnNumber: string;
+  region: string;
+  district: string;
+  street: string;
+  phoneNumber: string;
+  emailAddress: string;
+}
 
 interface ClientFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (clientData: any) => void;
+  editingClient?: Client | null;
 }
 
-const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) => {
+const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit, editingClient }) => {
   const [clientType, setClientType] = useState<'individual' | 'corporate'>('individual');
   const [formData, setFormData] = useState({
     // Personal Details
@@ -34,6 +57,54 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
     emailAddress: ''
   });
 
+  // Populate form when editing
+  useEffect(() => {
+    if (editingClient) {
+      setClientType(editingClient.clientType);
+      setFormData({
+        title: editingClient.title,
+        fullName: editingClient.fullName,
+        dateOfBirth: editingClient.dateOfBirth,
+        idType: editingClient.idType,
+        idNumber: editingClient.idNumber,
+        gender: editingClient.gender,
+        nationality: editingClient.nationality,
+        countryOfRegistration: editingClient.countryOfRegistration,
+        businessType: editingClient.businessType,
+        registrationNumber: editingClient.registrationNumber,
+        tinNumber: editingClient.tinNumber,
+        vrnNumber: editingClient.vrnNumber,
+        region: editingClient.region,
+        district: editingClient.district,
+        street: editingClient.street,
+        phoneNumber: editingClient.phoneNumber,
+        emailAddress: editingClient.emailAddress
+      });
+    } else {
+      // Reset form for new client
+      setClientType('individual');
+      setFormData({
+        title: '',
+        fullName: '',
+        dateOfBirth: '',
+        idType: '',
+        idNumber: '',
+        gender: '',
+        nationality: '',
+        countryOfRegistration: '',
+        businessType: '',
+        registrationNumber: '',
+        tinNumber: '',
+        vrnNumber: '',
+        region: '',
+        district: '',
+        street: '',
+        phoneNumber: '',
+        emailAddress: ''
+      });
+    }
+  }, [editingClient, isOpen]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -46,26 +117,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
     e.preventDefault();
     onSubmit({ ...formData, type: clientType });
     onClose();
-    // Reset form
-    setFormData({
-      title: '',
-      fullName: '',
-      dateOfBirth: '',
-      idType: '',
-      idNumber: '',
-      gender: '',
-      nationality: '',
-      countryOfRegistration: '',
-      businessType: '',
-      registrationNumber: '',
-      tinNumber: '',
-      vrnNumber: '',
-      region: '',
-      district: '',
-      street: '',
-      phoneNumber: '',
-      emailAddress: ''
-    });
   };
 
   if (!isOpen) return null;
@@ -83,7 +134,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
         <div className="inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Add New Client</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              {editingClient ? 'Edit Client' : 'Add New Client'}
+            </h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -140,7 +193,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
                       value={formData.title}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
                     >
                       <option value="">Select Title</option>
                       <option value="Mr">Mr</option>
@@ -351,7 +403,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
             <div className="bg-gray-50 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <MapPin className="h-5 w-5 mr-2 text-blue-600" />
-                General Details
+                Contact & Location Details
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
@@ -441,7 +493,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSubmit }) =>
                 type="submit"
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Add Client
+                {editingClient ? 'Update Client' : 'Add Client'}
               </button>
             </div>
           </form>
