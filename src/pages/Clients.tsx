@@ -40,7 +40,7 @@ const Clients: React.FC = () => {
 
   ]);
 
-  const handleAddClient = (clientData: any) => { 
+  const handleAddClient = (clientData: any) => {
     const newClient: Client = {
       id: `CLT-${String(clients.length + 1).padStart(3, '0')}`,
       clientType: clientData.type,
