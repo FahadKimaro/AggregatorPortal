@@ -129,7 +129,7 @@ const Clients: React.FC = () => {
         lastContact: new Date().toISOString().split('T')[0],
         status: 'active',
         createdAt: new Date().toISOString().split('T')[0],
-        created_by: user?.id || null
+        created_by: user?.id || auth.uid()
       };
 
       // Insert into Supabase
