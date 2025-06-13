@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Eye, EyeOff, Lock, User } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface LoginProps {
   onLogin: () => void;
@@ -17,16 +18,27 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
     setIsLoading(true);
 
-    // Simulate login delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: username,
+        password: password,
+      });
 
-    if (username === 'demo' && password === '123') {
-      onLogin();
-    } else {
-      setError('Invalid username or password');
+      if (authError) {
+        setError(authError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        onLogin();
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -54,7 +66,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -62,11 +74,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
                 <input
                   id="username"
-                  type="text"
+                  type="email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -110,15 +122,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <p className="text-red-600 text-sm">{error}</p>
               </div>
             )}
-
-            {/* Demo Credentials */}
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-xs text-gray-600 text-center">
-                Demo Credentials:<br />
-                Username: demo<br />
-                Password: 123
-              </p>
-            </div>
 
             {/* Login Button */}
             <button
