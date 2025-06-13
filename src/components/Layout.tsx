@@ -89,7 +89,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-500">
-                  Welcome back,
+                  fahadykimaro@gmail.com
                 </div>
               </div>
             </div>
