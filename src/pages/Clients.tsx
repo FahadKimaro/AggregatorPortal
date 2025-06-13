@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Phone, Mail, MapPin, Building2, Edit, Trash2, Eye } from 'lucide-react';
 import ClientForm from '../components/ClientForm';
+import { supabase } from '../lib/supabase';
 
 interface Client {
   id: string;
@@ -35,79 +36,261 @@ const Clients: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [clients, setClients] = useState<Client[]>([
+  const [clients, setClients] = useState<Client[]>([]);
 
-  ]);
+  // Load clients from Supabase on component mount
+  useEffect(() => {
+    loadClients();
+  }, []);
 
-  const handleAddClient = (clientData: any) => {
-    const newClient: Client = {
-      id: `CLT-${String(clients.length + 1).padStart(3, '0')}`,
-      clientType: clientData.type,
-      title: clientData.title || '',
-      fullName: clientData.fullName,
-      dateOfBirth: clientData.dateOfBirth || '',
-      idType: clientData.idType || '',
-      idNumber: clientData.idNumber || '',
-      gender: clientData.gender || '',
-      nationality: clientData.nationality || '',
-      countryOfRegistration: clientData.countryOfRegistration || '',
-      businessType: clientData.businessType || '',
-      registrationNumber: clientData.registrationNumber || '',
-      tinNumber: clientData.tinNumber || '',
-      vrnNumber: clientData.vrnNumber || '',
-      region: clientData.region || '',
-      district: clientData.district || '',
-      street: clientData.street || '',
-      phoneNumber: clientData.phoneNumber,
-      emailAddress: clientData.emailAddress,
-      activePolicies: 0,
-      totalPremium: 'TZS 0',
-      lastContact: new Date().toISOString().split('T')[0],
-      status: 'active',
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    
-    setClients(prev => [...prev, newClient]);
-    setIsFormOpen(false);
+  const loadClients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('Clients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading clients:', error);
+        return;
+      }
+
+      // Transform Supabase data to match our Client interface
+      const transformedClients = data?.map(client => ({
+        id: client.id.toString(),
+        clientType: client.clientType,
+        title: client.title || '',
+        fullName: client.fullName || '',
+        dateOfBirth: client.dateOfBirth || '',
+        idType: client.idType || '',
+        idNumber: client.idNumber || '',
+        gender: client.gender || '',
+        nationality: client.nationality || '',
+        countryOfRegistration: client.countryOfRegistration || '',
+        businessType: client.businessType || '',
+        registrationNumber: client.registrationNumber || '',
+        tinNumber: client.tinNumber || '',
+        vrnNumber: client.vrnNumber || '',
+        region: client.region || '',
+        district: client.district || '',
+        street: client.street || '',
+        phoneNumber: client.phoneNumber || '',
+        emailAddress: client.emailAddress || '',
+        activePolicies: parseInt(client.activePolicies) || 0,
+        totalPremium: client.totalPremium || 'TZS 0',
+        lastContact: client.lastContact || new Date().toISOString().split('T')[0],
+        status: client.status || 'active',
+        createdAt: client.createdAt || new Date().toISOString().split('T')[0]
+      })) || [];
+
+      setClients(transformedClients);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+    }
   };
 
-  const handleEditClient = (clientData: any) => {
+  const handleAddClient = async (clientData: any) => {
+    setLoading(true);
+    
+    try {
+      // Get the current authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error('Authentication error:', authError);
+        setLoading(false);
+        return;
+      }
+
+      // Prepare the client data for Supabase
+      const newClientData = {
+        clientType: clientData.type,
+        title: clientData.title || null,
+        fullName: clientData.fullName,
+        dateOfBirth: clientData.dateOfBirth || null,
+        idType: clientData.idType || null,
+        idNumber: clientData.idNumber || null,
+        gender: clientData.gender || null,
+        nationality: clientData.nationality || null,
+        countryOfRegistration: clientData.countryOfRegistration || null,
+        businessType: clientData.businessType || null,
+        registrationNumber: clientData.registrationNumber || null,
+        tinNumber: clientData.tinNumber || null,
+        vrnNumber: clientData.vrnNumber || null,
+        region: clientData.region || null,
+        district: clientData.district || null,
+        street: clientData.street || null,
+        phoneNumber: clientData.phoneNumber,
+        emailAddress: clientData.emailAddress,
+        activePolicies: '0',
+        totalPremium: 'TZS 0',
+        lastContact: new Date().toISOString().split('T')[0],
+        status: 'active',
+        createdAt: new Date().toISOString().split('T')[0],
+        created_by: user?.id || null
+      };
+
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('Clients')
+        .insert([newClientData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error inserting client:', error);
+        setLoading(false);
+        return;
+      }
+
+      // Transform the returned data to match our Client interface
+      const newClient: Client = {
+        id: data.id.toString(),
+        clientType: data.clientType,
+        title: data.title || '',
+        fullName: data.fullName || '',
+        dateOfBirth: data.dateOfBirth || '',
+        idType: data.idType || '',
+        idNumber: data.idNumber || '',
+        gender: data.gender || '',
+        nationality: data.nationality || '',
+        countryOfRegistration: data.countryOfRegistration || '',
+        businessType: data.businessType || '',
+        registrationNumber: data.registrationNumber || '',
+        tinNumber: data.tinNumber || '',
+        vrnNumber: data.vrnNumber || '',
+        region: data.region || '',
+        district: data.district || '',
+        street: data.street || '',
+        phoneNumber: data.phoneNumber || '',
+        emailAddress: data.emailAddress || '',
+        activePolicies: parseInt(data.activePolicies) || 0,
+        totalPremium: data.totalPremium || 'TZS 0',
+        lastContact: data.lastContact || new Date().toISOString().split('T')[0],
+        status: data.status || 'active',
+        createdAt: data.createdAt || new Date().toISOString().split('T')[0]
+      };
+
+      // Add to local state
+      setClients(prev => [newClient, ...prev]);
+      setIsFormOpen(false);
+      
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditClient = async (clientData: any) => {
     if (!editingClient) return;
     
-    const updatedClient: Client = {
-      ...editingClient,
-      clientType: clientData.type,
-      title: clientData.title || '',
-      fullName: clientData.fullName,
-      dateOfBirth: clientData.dateOfBirth || '',
-      idType: clientData.idType || '',
-      idNumber: clientData.idNumber || '',
-      gender: clientData.gender || '',
-      nationality: clientData.nationality || '',
-      countryOfRegistration: clientData.countryOfRegistration || '',
-      businessType: clientData.businessType || '',
-      registrationNumber: clientData.registrationNumber || '',
-      tinNumber: clientData.tinNumber || '',
-      vrnNumber: clientData.vrnNumber || '',
-      region: clientData.region || '',
-      district: clientData.district || '',
-      street: clientData.street || '',
-      phoneNumber: clientData.phoneNumber,
-      emailAddress: clientData.emailAddress,
-      lastContact: new Date().toISOString().split('T')[0]
-    };
+    setLoading(true);
     
-    setClients(prev => prev.map(client => 
-      client.id === editingClient.id ? updatedClient : client
-    ));
-    setEditingClient(null);
-    setIsFormOpen(false);
+    try {
+      // Prepare the updated client data for Supabase
+      const updatedClientData = {
+        clientType: clientData.type,
+        title: clientData.title || null,
+        fullName: clientData.fullName,
+        dateOfBirth: clientData.dateOfBirth || null,
+        idType: clientData.idType || null,
+        idNumber: clientData.idNumber || null,
+        gender: clientData.gender || null,
+        nationality: clientData.nationality || null,
+        countryOfRegistration: clientData.countryOfRegistration || null,
+        businessType: clientData.businessType || null,
+        registrationNumber: clientData.registrationNumber || null,
+        tinNumber: clientData.tinNumber || null,
+        vrnNumber: clientData.vrnNumber || null,
+        region: clientData.region || null,
+        district: clientData.district || null,
+        street: clientData.street || null,
+        phoneNumber: clientData.phoneNumber,
+        emailAddress: clientData.emailAddress,
+        lastContact: new Date().toISOString().split('T')[0]
+      };
+
+      // Update in Supabase
+      const { data, error } = await supabase
+        .from('Clients')
+        .update(updatedClientData)
+        .eq('id', editingClient.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating client:', error);
+        setLoading(false);
+        return;
+      }
+
+      // Transform the returned data to match our Client interface
+      const updatedClient: Client = {
+        id: data.id.toString(),
+        clientType: data.clientType,
+        title: data.title || '',
+        fullName: data.fullName || '',
+        dateOfBirth: data.dateOfBirth || '',
+        idType: data.idType || '',
+        idNumber: data.idNumber || '',
+        gender: data.gender || '',
+        nationality: data.nationality || '',
+        countryOfRegistration: data.countryOfRegistration || '',
+        businessType: data.businessType || '',
+        registrationNumber: data.registrationNumber || '',
+        tinNumber: data.tinNumber || '',
+        vrnNumber: data.vrnNumber || '',
+        region: data.region || '',
+        district: data.district || '',
+        street: data.street || '',
+        phoneNumber: data.phoneNumber || '',
+        emailAddress: data.emailAddress || '',
+        activePolicies: parseInt(data.activePolicies) || 0,
+        totalPremium: data.totalPremium || 'TZS 0',
+        lastContact: data.lastContact || new Date().toISOString().split('T')[0],
+        status: data.status || 'active',
+        createdAt: data.createdAt || new Date().toISOString().split('T')[0]
+      };
+
+      // Update local state
+      setClients(prev => prev.map(client => 
+        client.id === editingClient.id ? updatedClient : client
+      ));
+      
+      setEditingClient(null);
+      setIsFormOpen(false);
+      
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteClient = (clientId: string) => {
-    if (window.confirm('Are you sure you want to delete this client?')) {
+  const handleDeleteClient = async (clientId: string) => {
+    if (!window.confirm('Are you sure you want to delete this client?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('Clients')
+        .delete()
+        .eq('id', clientId);
+
+      if (error) {
+        console.error('Error deleting client:', error);
+        return;
+      }
+
+      // Remove from local state
       setClients(prev => prev.filter(client => client.id !== clientId));
+      
+    } catch (error) {
+      console.error('Unexpected error:', error);
     }
   };
 
@@ -162,10 +345,11 @@ const Clients: React.FC = () => {
         </div>
         <button 
           onClick={openAddForm}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          disabled={loading}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
         >
           <Plus className="h-5 w-5" />
-          <span>Add New Client</span>
+          <span>{loading ? 'Processing...' : 'Add New Client'}</span>
         </button>
       </div>
 
@@ -339,6 +523,7 @@ const Clients: React.FC = () => {
                         onClick={() => openEditForm(client)}
                         className="text-green-600 hover:text-green-900" 
                         title="Edit Client"
+                        disabled={loading}
                       >
                         <Edit className="h-4 w-4" />
                       </button>
@@ -346,6 +531,7 @@ const Clients: React.FC = () => {
                         onClick={() => handleDeleteClient(client.id)}
                         className="text-red-600 hover:text-red-900" 
                         title="Delete Client"
+                        disabled={loading}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
