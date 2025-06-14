@@ -55,20 +55,20 @@ const Leads: React.FC = () => {
   const handleAddLead = (leadData: any) => {
     const newLead = {
       id: leads.length + 1,
-      name: leadData.leadName,
-      email: leadData.emailId,
-      phone: leadData.mobile,
-      company: leadData.customerName || 'Individual',
-      location: `${leadData.district || ''}, ${leadData.region || 'Tanzania'}`.replace(/^, /, ''),
-      status: leadData.leadStatus || 'new',
-      source: leadData.leadChannel || 'Direct',
+      name: leadData.leadDetails?.leadName || 'Unknown Lead',
+      email: leadData.leadDetails?.emailId || '',
+      phone: leadData.leadDetails?.mobile || '',
+      company: leadData.leadDetails?.customerName || 'Individual',
+      location: `${leadData.leadDetails?.district || ''}, ${leadData.leadDetails?.region || 'Tanzania'}`.replace(/^, /, ''),
+      status: leadData.leadDetails?.leadStatus || 'new',
+      source: leadData.marketingFeedback?.marketingSource || leadData.leadDetails?.leadChannel || 'Direct',
       created: new Date().toISOString().split('T')[0],
       value: 'TZS 0',
-      vehicleReg: leadData.registrationNumber || '-',
-      insuranceType: leadData.insuranceType || 'Motor Insurance'
+      vehicleReg: leadData.vehicleDetails?.registrationNumber || '-',
+      insuranceType: leadData.coverDetails?.insuranceType || 'Motor Insurance'
     };
     
-    setLeads(prev => [...prev, newLead]);
+    setLeads(prev => [newLead, ...prev]);
   };
 
   const getStatusColor = (status: string) => {
